@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSC Update Status — M.DESIGN</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #F2E8D0;
+    color: #1F3A47;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .header {
+    background: #2E6A7C;
+    border-radius: 12px 12px 0 0;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-title-block p {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #F2E8D0;
+    margin: 0 0 6px;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .header-title-block h1 {
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0;
+    color: #FFFFFF;
+    letter-spacing: -0.3px;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .live-badge {
+    text-align: right;
+  }
+  .live-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+    font-size: 12px;
+    color: #F2E8D0;
+    opacity: 0.9;
+  }
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6EE0A0;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .logo-tile {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    background: #F2E8D0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .logo-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .logo-tile-fallback {
+    font-weight: 600;
+    font-size: 20px;
+    color: #E8A823;
+    letter-spacing: -1px;
+  }
+  .kpi-strip {
+    background: #F2E8D0;
+    padding: 20px 32px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .kpi-card {
+    background: #FFFFFF;
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .kpi-label {
+    font-size: 11px;
+    color: #2E6A7C;
+    margin: 0 0 6px;
+    font-weight: 500;
+    opacity: 0.75;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .kpi-value {
+    font-size: 26px;
+    font-weight: 500;
+    margin: 0;
+  }
+  .main-content {
+    background: #FAFAF7;
+    padding: 20px 32px 32px;
+    border-radius: 0 0 12px 12px;
+  }
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label {
+    font-size: 11px;
+    color: #1F3A47;
+    margin-right: 4px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .fbtn {
+    font-size: 13px;
+    padding: 7px 16px;
+    background: #FFFFFF;
+    border: 1px solid rgba(46, 106, 124, 0.3);
+    border-radius: 8px;
+    color: #2E6A7C;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+    font-family: inherit;
+  }
+  .fbtn:hover { background: #F2E8D0; }
+  .fbtn-active { background: #2E6A7C; color: #FFFFFF; border-color: #2E6A7C; }
+  .fbtn-active:hover { background: #1F3A47; }
+  .charts-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .card {
+    background: #FFFFFF;
+    border: 1px solid rgba(46, 106, 124, 0.2);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0 0 14px;
+    color: #1F3A47;
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card-meta {
+    font-size: 11px;
+    color: #2E6A7C;
+    opacity: 0.7;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: #2E6A7C;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+  .legend-val {
+    color: #1F3A47;
+    font-weight: 500;
+  }
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 240px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    text-align: left;
+    padding: 10px 8px;
+    font-weight: 500;
+    color: #2E6A7C;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(46, 106, 124, 0.3);
+  }
+  tr.row { border-bottom: 1px solid rgba(46, 106, 124, 0.08); }
+  tr.row:hover { background: #F2E8D0; }
+  td { padding: 10px 8px; color: #1F3A47; }
+  .pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .pill-green { background: #EAF3DE; color: #173404; }
+  .pill-amber { background: #FAEEDA; color: #4A2E04; }
+  .pill-red { background: #FCEBEB; color: #501313; }
+  .bar-track {
+    width: 100%;
+    height: 7px;
+    background: #F2E8D0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  .partner-table-wrap, .detail-table-wrap {
+    overflow-x: auto;
+  }
+  .detail-table-scroll {
+    max-height: 360px;
+    overflow-y: auto;
+    border: 1px solid rgba(46, 106, 124, 0.15);
+    border-radius: 8px;
+  }
+  .detail-table-scroll thead {
+    position: sticky;
+    top: 0;
+    background: #F2E8D0;
+    z-index: 1;
+  }
+  .detail-table-scroll thead th {
+    color: #1F3A47;
+    border-bottom: none;
+  }
+  .aging-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .aging-card {
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .aging-label {
+    font-size: 11px;
+    margin: 0 0 4px;
+    font-weight: 500;
+  }
+  .aging-value {
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0;
+  }
+  .aging-pct {
+    font-size: 10px;
+    margin: 4px 0 0;
+    opacity: 0.75;
+  }
+  .search-input {
+    width: 220px;
+    font-size: 13px;
+    padding: 7px 12px;
+    border: 1px solid rgba(46, 106, 124, 0.3);
+    border-radius: 8px;
+    color: #1F3A47;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: #2E6A7C; }
+  .loading-state, .error-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #2E6A7C;
+  }
+  .error-state { color: #A32D2D; }
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 11px;
+    color: #2E6A7C;
+    opacity: 0.7;
+  }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace; font-size: 11px; }
+  .muted { color: rgba(31, 58, 71, 0.4); }
+  @media (max-width: 640px) {
+    .container { padding: 12px; }
+    .header, .kpi-strip, .main-content { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-title-block">
+      <p>Prepared for M.DESIGN</p>
+      <h1>OSC Update Status</h1>
+    </div>
+    <div class="header-right">
+      <div class="live-badge">
+        <div class="live-badge-row">
+          <span class="live-dot"></span>
+          <span>Live · synced <span id="lastSync">—</span></span>
+        </div>
+      </div>
+      <div class="logo-tile">
+        <img src="logo.png" alt="M.DESIGN logo" onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'logo-tile-fallback\'>M.</span>';">
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-strip">
+    <div class="kpi-card"><p class="kpi-label">Total POPs</p><p class="kpi-value" id="kpiTotal" style="color:#1F3A47;">—</p></div>
+    <div class="kpi-card"><p class="kpi-label">OSC updated</p><p class="kpi-value" id="kpiUpdated" style="color:#3B6D11;">—</p></div>
+    <div class="kpi-card"><p class="kpi-label">Check remarks</p><p class="kpi-value" id="kpiCheck" style="color:#E8A823;">—</p></div>
+    <div class="kpi-card"><p class="kpi-label">High prio</p><p class="kpi-value" id="kpiPrio" style="color:#A32D2D;">—</p></div>
+    <div class="kpi-card"><p class="kpi-label">% complete</p><p class="kpi-value" id="kpiPct" style="color:#2E6A7C;">—</p></div>
+  </div>
+
+  <div class="main-content">
+
+    <div id="loadingState" class="loading-state">Loading live data…</div>
+    <div id="errorState" class="error-state" style="display:none;"></div>
+
+    <div id="dashboardBody" style="display:none;">
+
+      <div class="filter-bar">
+        <span class="filter-label">Filter</span>
+        <button data-filter="all" class="fbtn fbtn-active">All</button>
+        <button data-filter="OSC UPDATED" class="fbtn">OSC updated</button>
+        <button data-filter="CHECK REMARKS" class="fbtn">Check remarks</button>
+        <button data-filter="HIGH PRIO" class="fbtn">High prio only</button>
+      </div>
+
+      <div class="charts-row">
+        <div class="card">
+          <p class="card-title">Status breakdown</p>
+          <div class="legend">
+            <span class="legend-item"><span class="legend-swatch" style="background:#3B6D11;"></span>OSC updated <span class="legend-val" id="legUpd">0</span></span>
+            <span class="legend-item"><span class="legend-swatch" style="background:#E8A823;"></span>Check remarks <span class="legend-val" id="legChk">0</span></span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="donutChart" role="img" aria-label="Donut chart of OSC status"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <p class="card-title">Partner performance</p>
+          <div class="chart-wrap">
+            <canvas id="barChart" role="img" aria-label="Stacked bar of partner performance"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header">
+          <p class="card-title" style="margin:0;">Partner breakdown</p>
+          <span class="card-meta">Sorted by % complete</span>
+        </div>
+        <div class="partner-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Partner</th>
+                <th style="text-align:right;">Total</th>
+                <th style="text-align:right;">Updated</th>
+                <th style="text-align:right;">Pending</th>
+                <th style="text-align:right;">High prio</th>
+                <th style="min-width:160px;">Progress</th>
+              </tr>
+            </thead>
+            <tbody id="partnerTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <p class="card-title">Aging — how long open items have been waiting</p>
+        <div id="agingGrid" class="aging-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <p class="card-title" style="margin:0;">Detailed records</p>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <input type="text" id="search" class="search-input" placeholder="Search popzone or partner…">
+            <span class="card-meta" id="rowCount">—</span>
+          </div>
+        </div>
+        <div class="detail-table-wrap">
+          <div class="detail-table-scroll">
+            <table style="min-width:720px;">
+              <thead>
+                <tr>
+                  <th>Received</th>
+                  <th>Partner</th>
+                  <th>Popzone</th>
+                  <th>Prio</th>
+                  <th>Status</th>
+                  <th>Remark</th>
+                </tr>
+              </thead>
+              <tbody id="detailTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Live data sourced from OSC tracker · Updates every 15 minutes ·
+    <span id="dataTimestamp"></span>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+(function(){
+  const TEAL = "#2E6A7C";
+  const MUSTARD = "#E8A823";
+  const GREEN = "#3B6D11";
+  const RED = "#A32D2D";
+  const NAVY = "#1F3A47";
+
+  let DATA = [];
+  let currentFilter = "all";
+  let searchTerm = "";
+  let donutChart = null;
+  let barChart = null;
+
+  async function loadData() {
+    try {
+      const cacheBuster = Date.now();
+      const response = await fetch(`data.json?v=${cacheBuster}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const json = await response.json();
+
+      // Support both shapes: bare array, OR { updated_at, rows: [...] }
+      if (Array.isArray(json)) {
+        DATA = json;
+        document.getElementById('dataTimestamp').textContent = '';
+      } else {
+        DATA = json.rows || [];
+        if (json.updated_at) {
+          const d = new Date(json.updated_at);
+          document.getElementById('dataTimestamp').textContent = 'Data last refreshed: ' + d.toLocaleString();
+        }
+      }
+
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('errorState').style.display = 'none';
+      document.getElementById('dashboardBody').style.display = 'block';
+
+      renderAll();
+
+      const now = new Date();
+      document.getElementById('lastSync').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    } catch (err) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('dashboardBody').style.display = 'none';
+      const errEl = document.getElementById('errorState');
+      errEl.style.display = 'block';
+      errEl.innerHTML = `<p style="font-weight:500; margin:0 0 8px;">Could not load data</p><p style="font-size:13px; opacity:0.8; margin:0;">${err.message}. The dashboard will retry automatically.</p>`;
+    }
+  }
+
+  function applyFilter(rows) {
+    let filtered = rows;
+    if (currentFilter === "HIGH PRIO") filtered = filtered.filter(r => r.prio === "HIGH PRIO");
+    else if (currentFilter !== "all") filtered = filtered.filter(r => r.status === currentFilter);
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      filtered = filtered.filter(r => (r.popzone || "").toLowerCase().includes(q) || (r.partner || "").toLowerCase().includes(q));
+    }
+    return filtered;
+  }
+
+  function renderKPIs() {
+    const total = DATA.length;
+    const updated = DATA.filter(r => r.status === "OSC UPDATED").length;
+    const check = DATA.filter(r => r.status === "CHECK REMARKS").length;
+    const prio = DATA.filter(r => r.prio === "HIGH PRIO").length;
+    const pct = total > 0 ? Math.round((updated / total) * 1000) / 10 : 0;
+    document.getElementById('kpiTotal').textContent = total;
+    document.getElementById('kpiUpdated').textContent = updated;
+    document.getElementById('kpiCheck').textContent = check;
+    document.getElementById('kpiPrio').textContent = prio;
+    document.getElementById('kpiPct').textContent = pct.toFixed(1) + '%';
+    document.getElementById('legUpd').textContent = updated;
+    document.getElementById('legChk').textContent = check;
+  }
+
+  function renderPartnerTable() {
+    const tbody = document.getElementById('partnerTable');
+    const partners = [...new Set(DATA.map(r => r.partner))].filter(Boolean);
+    const rows = partners.map(p => {
+      const items = DATA.filter(r => r.partner === p);
+      const total = items.length;
+      const upd = items.filter(r => r.status === "OSC UPDATED").length;
+      const chk = items.filter(r => r.status === "CHECK REMARKS").length;
+      const hp = items.filter(r => r.prio === "HIGH PRIO").length;
+      const pct = total > 0 ? Math.round((upd / total) * 100) : 0;
+      return { p, total, upd, chk, hp, pct };
+    }).sort((a, b) => b.pct - a.pct);
+
+    tbody.innerHTML = rows.map(r => {
+      const barColor = r.pct >= 80 ? GREEN : r.pct >= 40 ? MUSTARD : RED;
+      return `
+        <tr class="row">
+          <td style="font-weight:500;">${r.p}</td>
+          <td style="text-align:right;">${r.total}</td>
+          <td style="text-align:right; color:${GREEN}; font-weight:500;">${r.upd}</td>
+          <td style="text-align:right; color:${r.chk > 0 ? MUSTARD : 'rgba(31,58,71,0.4)'}; font-weight:500;">${r.chk}</td>
+          <td style="text-align:right;">${r.hp > 0 ? `<span class="pill pill-red">${r.hp}</span>` : `<span class="muted">—</span>`}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="bar-track" style="flex:1;"><div class="bar-fill" style="width:${r.pct}%; background:${barColor};"></div></div>
+              <span style="font-size:11px; min-width:40px; text-align:right; font-weight:500;">${r.pct}%</span>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderAging() {
+    const grid = document.getElementById('agingGrid');
+    const today = new Date();
+    const open = DATA.filter(r => r.status === "CHECK REMARKS" && r.received);
+    const buckets = [
+      { label: "0–7 days", color: GREEN, bg: "#EAF3DE" },
+      { label: "1–2 weeks", color: TEAL, bg: "#E4EEF1" },
+      { label: "2–4 weeks", color: "#9B6E15", bg: "#FAEEDA" },
+      { label: ">1 month", color: RED, bg: "#FCEBEB" }
+    ];
+    const counts = [0, 0, 0, 0];
+    open.forEach(r => {
+      const d = new Date(r.received);
+      if (isNaN(d.getTime())) return;
+      const days = Math.floor((today - d) / (1000 * 60 * 60 * 24));
+      if (days <= 7) counts[0]++;
+      else if (days <= 14) counts[1]++;
+      else if (days <= 30) counts[2]++;
+      else counts[3]++;
+    });
+    const totalOpen = counts.reduce((a, b) => a + b, 0);
+    grid.innerHTML = buckets.map((b, i) => {
+      const pct = totalOpen > 0 ? Math.round((counts[i] / totalOpen) * 100) : 0;
+      return `
+        <div class="aging-card" style="background:${b.bg};">
+          <p class="aging-label" style="color:${b.color};">${b.label}</p>
+          <p class="aging-value" style="color:${b.color};">${counts[i]}</p>
+          <p class="aging-pct" style="color:${b.color};">${pct}% of open</p>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderDetailTable() {
+    const tbody = document.getElementById('detailTable');
+    const filtered = applyFilter(DATA);
+    document.getElementById('rowCount').textContent = filtered.length + ' of ' + DATA.length + ' rows';
+    tbody.innerHTML = filtered.map(r => {
+      const statusPill = r.status === "OSC UPDATED"
+        ? `<span class="pill pill-green">OSC updated</span>`
+        : `<span class="pill pill-amber">Check remarks</span>`;
+      const prioCell = r.prio === "HIGH PRIO" ? `<span class="pill pill-red">High prio</span>` : `<span class="muted">—</span>`;
+      return `
+        <tr class="row">
+          <td>${r.received || '<span class="muted">—</span>'}</td>
+          <td style="font-weight:500;">${r.partner || ''}</td>
+          <td class="mono">${r.popzone || ''}</td>
+          <td>${prioCell}</td>
+          <td>${statusPill}</td>
+          <td style="color:#2E6A7C; font-size:12px;">${r.remark || '—'}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderCharts() {
+    const updated = DATA.filter(r => r.status === "OSC UPDATED").length;
+    const check = DATA.filter(r => r.status === "CHECK REMARKS").length;
+
+    if (donutChart) donutChart.destroy();
+    donutChart = new Chart(document.getElementById('donutChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['OSC updated', 'Check remarks'],
+        datasets: [{
+          data: [updated, check],
+          backgroundColor: [GREEN, MUSTARD],
+          borderWidth: 2,
+          borderColor: '#FFFFFF'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    const partners = [...new Set(DATA.map(r => r.partner))].filter(Boolean);
+    const updByPartner = partners.map(p => DATA.filter(r => r.partner === p && r.status === "OSC UPDATED").length);
+    const chkByPartner = partners.map(p => DATA.filter(r => r.partner === p && r.status === "CHECK REMARKS").length);
+
+    if (barChart) barChart.destroy();
+    barChart = new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels: partners,
+        datasets: [
+          { label: 'Updated', data: updByPartner, backgroundColor: GREEN, borderRadius: 3 },
+          { label: 'Pending', data: chkByPartner, backgroundColor: MUSTARD, borderRadius: 3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { stacked: true, ticks: { font: { size: 10 }, color: NAVY }, grid: { display: false } },
+          y: { stacked: true, beginAtZero: true, ticks: { font: { size: 10 }, color: NAVY, stepSize: 1 }, grid: { color: 'rgba(46, 106, 124, 0.08)' } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  function renderAll() {
+    renderKPIs();
+    renderPartnerTable();
+    renderAging();
+    renderDetailTable();
+    renderCharts();
+  }
+
+  document.querySelectorAll('.fbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('fbtn-active'));
+      btn.classList.add('fbtn-active');
+      currentFilter = btn.dataset.filter;
+      renderDetailTable();
+    });
+  });
+
+  document.getElementById('search').addEventListener('input', (e) => {
+    searchTerm = e.target.value;
+    renderDetailTable();
+  });
+
+  loadData();
+  setInterval(loadData, 5 * 60 * 1000);
+})();
+</script>
+</body>
+</html>
